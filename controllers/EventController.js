@@ -1,9 +1,9 @@
-const { Event, Location } = require('../models')
+const { Event, Location, Host } = require('../models')
 
 class EventController {
   async getAllEvents(req, res) {
     try {
-      const events = await Event.findAll({ include: Location })
+      const events = await Event.findAll({ include: [Location, Host] })
       return res.status(200).json({ events })
     } catch (error) {
       return res.status(500).send(error.message)
@@ -15,7 +15,7 @@ class EventController {
       const { id } = req.params
       const event = await Event.findOne({
         where: { id: id },
-        include: Location
+        include: [Location, Host]
       })
       if (event) {
         return res.status(200).json({ event })
@@ -47,7 +47,7 @@ class EventController {
       if (updated) {
         const updatedEvent = await Event.findOne({
           where: { id: id },
-          include: Location
+          include: [Location, Host]
         })
         return res.status(200).json({ event: updatedEvent })
       }

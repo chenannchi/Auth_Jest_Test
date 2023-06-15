@@ -2,7 +2,7 @@ process.env.NODE_ENV = 'test'
 const request = require('supertest')
 const app = require('../server')
 const { createToken, hashPassword } = require('../middleware')
-const { User, Location, Event } = require('../models')
+const { User, Location, Event, Host } = require('../models')
 
 let testToken
 
@@ -12,6 +12,7 @@ describe('Event controller tests', () => {
   let testEvent
   let testLocationId
   let testEventId
+  let testHost, testHostId
 
   beforeAll(async () => {
     // Create test user
@@ -32,11 +33,18 @@ describe('Event controller tests', () => {
     })
     testLocationId = testLocation.id
 
+    // Create host
+    testHost = await Host.create({
+      hostname: 'ABC Company'
+    })
+    testHostId = testHost.id
+
     // Create event
     testEvent = await Event.create({
       title: 'testEvent',
       cost: 100,
-      LocationId: testLocationId
+      locationId: testLocationId,
+      hostId: testHostId
     })
     testEventId = testEvent.id
   })
@@ -48,7 +56,8 @@ describe('Event controller tests', () => {
       .send({
         title: 'newTestEvent',
         cost: 50,
-        LocationId: testLocationId
+        locationId: testLocationId,
+        hostId: testHostId,
       })
 
     expect(response.statusCode).toBe(201)

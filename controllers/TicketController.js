@@ -4,7 +4,10 @@ class TicketController {
   async getAllTickets(req, res) {
     try {
       const tickets = await Ticket.findAll({ include: [User, Event] })
+
+      // if (tickets){
       return res.status(200).json({ tickets })
+      // }
     } catch (error) {
       return res.status(500).send(error.message)
     }

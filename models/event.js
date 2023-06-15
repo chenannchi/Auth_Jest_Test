@@ -11,6 +11,8 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Event.belongsTo(models.Location, { foreignKey: 'locationId' })
 
+      Event.belongsTo(models.Host, { foreignKey: 'hostId' })
+
       Event.hasMany(models.Ticket, { foreignKey: 'eventId' })
     }
   }

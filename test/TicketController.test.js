@@ -2,26 +2,27 @@ process.env.NODE_ENV = 'test'
 const request = require('supertest')
 const app = require('../server')
 const { createToken, hashPassword } = require('../middleware')
-const { User, Event, Ticket } = require('../models')
+const { User, Event, Ticket, Host, Location } = require('../models')
 
 let testToken
 
 describe('Ticker controller tests', () => {
-  let testUser
+  let testUser, testUser2
   let testUserId
   let testUserId2
   let testEvent
   let testTicket
+  let testHost, testHostId, testLocation, testLocationId
 
   beforeAll(async () => {
     // create testUser
-    const testUser = await User.create({
+    testUser = await User.create({
       username: 'testuser',
       passwordDigest: await hashPassword('testpassword')
     })
     testUserId = testUser.id
     // create second user
-    const testUser2 = await User.create({
+    testUser2 = await User.create({
       username: 'testUser2',
       passwordDigest: await hashPassword('testpassword2')
     })
@@ -33,11 +34,30 @@ describe('Ticker controller tests', () => {
       username: testUser.username,
       passwordDigest: testUser.passwordDigest
     })
+    
+    // Create location
+    testLocation = await Location.create({
+      venueName: 'testVenue',
+      walkable: true
+    })
+    testLocationId = testLocation.id
+
+    // Create host
+    testHost = await Host.create({
+      hostname: 'ABC Company'
+    })
+    testHostId = testHost.id
+
     // create test event
     testEvent = await Event.create({
       title: 'testEvent',
-      cost: 100
+      cost: 100,
+      locationId: testLocationId,
+      hostId: testHostId,
     })
+
+    // testEventId = testEventId
+
     // create test ticket
     testTicket = await Ticket.create({
       userId: testUser.id,
@@ -79,7 +99,7 @@ describe('Ticker controller tests', () => {
     expect(response.body.ticket.eventId).toBe(testTicket.eventId)
   })
 
-  test('Update ticketuserId', async () => {
+  test('Update ticket userId', async () => {
     const response = await request(app)
       .put(`/api/ticket/${testTicket.id}`)
       .set(`Authorization`, `Bearer ${testToken}`)
@@ -104,6 +124,8 @@ describe('Ticker controller tests', () => {
       await User.destroy({ truncate: { cascade: true } })
       await Event.destroy({ truncate: { cascade: true } })
       await Ticket.destroy({ truncate: { cascade: true } })
+      await Location.destroy({ truncate: { cascade: true } })
+      await Host.destroy({ truncate: { cascade: true } })
     } catch (error) {
       console.log('Error cleanign up test data: ', error)
     }
